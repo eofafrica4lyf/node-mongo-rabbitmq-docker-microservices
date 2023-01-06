@@ -3,7 +3,7 @@ const express = require('express')
 const amqp = require('amqplib');
 
 const router = express.Router();
-const {generateUuid} = require('../utils/helper');
+const {uuid} = require("uuidv4")
 const { closeOtherActiveChannels } = require('../services/channel.service');
 const channelService = require('../services/channel.service');
 
@@ -19,7 +19,7 @@ connect();
 router.post('/channel', async (req, res) => {
     try {
         const {travelerId, channelName} = req.body;
-        const correlationId = generateUuid();
+        const correlationId = uuid();
         channel.sendToQueue("AGENT", Buffer.from(JSON.stringify({
             correlationId,
             topic: "GET_ALL_AGENTS",
@@ -29,9 +29,8 @@ router.post('/channel', async (req, res) => {
         channel.consume("CHANNEL", async (message)  => {
             const parsedMessage = JSON.parse(message.content.toString());
             if(parsedMessage.correlationId == correlationId) {
-                console.log("Correlates........", parsedMessage.correlationId, correlationId)
+                console.log("Correlates........")
                 const agents = parsedMessage.agents;
-                // channel.ack(message);
                 closeOtherActiveChannels(travelerId);
                 channelService.createChannel({travelerId, channelName, agents});
             }

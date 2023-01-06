@@ -3,7 +3,6 @@ const channelRepository = new ChannelRepository();
 
 const channelService = {
     async createChannel ({travelerId, channelName, agents}) {
-		console.log("TCL: createChannel -> agents", agents)
         const selectedAgent = this.pickAgentToAssign(agents);
         return await channelRepository.createChannel({
             travelerId,
