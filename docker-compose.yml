@@ -1,0 +1,44 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - ${MONGO_PORT}:27017
+    volumes:
+      - mongo:/data/db
+  
+  rabbitmq:
+    image: rabbitmq:3.10-rc-management-alpine
+    ports:
+      # AMQP protocol port
+      - "5672:5672"
+      # HTTP management UI
+      - "15672:15672"
+
+  agent-svc:
+    image: node:16
+    command: 'npm run dev'
+    restart: unless-stopped
+    working_dir: /usr/src/app
+    ports:
+      - ${AGENT_SVC_PORT}:3003
+    volumes:
+      - ./agent-svc:/usr/src/app
+    depends_on:
+      - mongo
+  
+  channel-svc:
+    image: node:16
+    command: 'npm run dev'
+    restart: unless-stopped
+    working_dir: /usr/src/app
+    ports:
+      - ${CHANNEL_SVC_PORT}:3004
+    volumes:
+      - ./channel-svc:/usr/src/app
+    depends_on:
+      - mongo
+
+volumes:
+  mongo:

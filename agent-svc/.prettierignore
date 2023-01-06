@@ -1,0 +1,6 @@
+node_modules/
+
+.env
+.eslintignore
+package.json
+package-lock.json
