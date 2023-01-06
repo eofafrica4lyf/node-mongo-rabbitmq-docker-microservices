@@ -1,5 +1,4 @@
 module.exports = {
-    id: {type: String},
     firstName: {type: String},
     lastName: {type: String},
     workingHours: {
