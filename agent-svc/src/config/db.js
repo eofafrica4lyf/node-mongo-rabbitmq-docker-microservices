@@ -4,6 +4,7 @@ const { MONGO_URI } = process.env;
 
 exports.connect = () => {
   // Connecting to the database
+  mongoose.set('strictQuery', false);
   mongoose
     .connect(MONGO_URI, {
       useNewUrlParser: true,

@@ -2,19 +2,33 @@ version: '3.9'
 services:
   mongo:
     image: mongo
+    hostname: mongo
     restart: unless-stopped
     ports:
       - ${MONGO_PORT}:27017
     volumes:
+      - ./channel-svc/src/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
       - mongo:/data/db
+    networks:
+      - rabbitmq_nodejs
   
   rabbitmq:
-    image: rabbitmq:3.10-rc-management-alpine
+    #image: rabbitmq:3.10-rc-management-alpine
+    build: ./rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     ports:
-      # AMQP protocol port
       - "5672:5672"
-      # HTTP management UI
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - rabbitmq_nodejs
 
   agent-svc:
     image: node:16
@@ -26,7 +40,10 @@ services:
     volumes:
       - ./agent-svc:/usr/src/app
     depends_on:
-      - mongo
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rabbitmq_nodejs
   
   channel-svc:
     image: node:16
@@ -38,7 +55,14 @@ services:
     volumes:
       - ./channel-svc:/usr/src/app
     depends_on:
-      - mongo
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - rabbitmq_nodejs
 
 volumes:
   mongo:
+
+networks:
+  rabbitmq_nodejs:
+    driver: bridge
