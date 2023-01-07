@@ -1,4 +1,5 @@
 const Agent = require("../model/agent");
+const { Types } = require("mongoose");
 
 function AgentRepository () {
     this.create = async (data) => {
@@ -14,6 +15,15 @@ function AgentRepository () {
     this.getAllAgents = async () => {
         const allAgents = await Agent.find({})
         return Promise.resolve(allAgents);
+    }
+    
+    this.getAgentsByIds = async (ids) => {
+        const agents = await Agent.find({
+            _id: {
+                $in: ids.map(id => Types.ObjectId(id))
+            }
+        })
+        return Promise.resolve(agents);
     }
 
     this.getSingleAgentByID = async (agentId) => {

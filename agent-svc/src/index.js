@@ -20,13 +20,12 @@ connect().then(() => {
     channel.consume("AGENT", async (message) => {
         const parsedMessage = JSON.parse(message.content.toString());
         if (parsedMessage.topic === "GET_ALL_AGENTS") {
-            const allAgents = await agentService.getAll();
-            console.log("TCL: allAgents", allAgents)
+            const agents = await agentService.getAll(parsedMessage.data);
             channel.sendToQueue(
                 "CHANNEL",
                 Buffer.from(JSON.stringify({
                     correlationId: parsedMessage.correlationId, 
-                    agents: allAgents
+                    agents: agents
                 }))
             )
         }
