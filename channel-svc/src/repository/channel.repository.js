@@ -26,7 +26,7 @@ function ChannelRepository () {
     }
 
     this.updateChannelsByTraveler = async (travelerId) => {
-        return await Channel.updateMany({_id: travelerId }, {isActive: false});
+        return await Channel.updateMany({travelerId}, {isActive: false});
     }
 }
 
