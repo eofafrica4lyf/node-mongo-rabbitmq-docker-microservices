@@ -11,6 +11,13 @@ services:
       - mongo:/data/db
     networks:
       - rabbitmq_nodejs
+    
+  mongo-seed:
+    build: ./mongo-seed
+    depends_on:
+      - mongo
+    networks:
+      - rabbitmq_nodejs
   
   rabbitmq:
     #image: rabbitmq:3.10-rc-management-alpine
