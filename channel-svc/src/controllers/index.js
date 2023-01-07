@@ -3,7 +3,7 @@ const express = require('express')
 const amqp = require('amqplib');
 
 const router = express.Router();
-const {uuid} = require("uuidv4")
+const { v4: uuidv4 } = require('uuid')
 const { closeOtherActiveChannels } = require('../services/channel.service');
 const channelService = require('../services/channel.service');
 
@@ -19,24 +19,32 @@ connect();
 router.post('/channel', async (req, res) => {
     try {
         const {travelerId, channelName} = req.body;
-        const correlationId = uuid();
-        channel.sendToQueue("AGENT", Buffer.from(JSON.stringify({
-            correlationId,
-            topic: "GET_ALL_AGENTS",
-            replyTo: "CHANNEL",
-            data: null
-        })));
-        channel.consume("CHANNEL", async (message)  => {
-            const parsedMessage = JSON.parse(message.content.toString());
-            if(parsedMessage.correlationId == correlationId) {
-                console.log("Correlates........")
-                const agents = parsedMessage.agents;
-                closeOtherActiveChannels(travelerId);
-                channelService.createChannel({travelerId, channelName, agents});
-            }
-        },{
-            noAck: true
-        })
+        const channelsPerAgent = await channelService.getChannelsPerAgent();
+
+        if(channelsPerAgent.length > 0) {
+            const correlationId = uuidv4();
+            channel.sendToQueue("AGENT", Buffer.from(JSON.stringify({
+                correlationId,
+                topic: "GET_ALL_AGENTS",
+                replyTo: "CHANNEL",
+                data: channelsPerAgent.map(group => group._id)
+            })));
+            channel.consume("CHANNEL", async (message)  => {
+                const parsedMessage = JSON.parse(message.content.toString());
+                if(parsedMessage.correlationId == correlationId) {
+                    console.log("Correlates........")
+                    const agents = parsedMessage.agents;
+                    closeOtherActiveChannels(travelerId);
+                    channelService.createChannel({travelerId, channelName, channelsPerAgent, agents});
+                }
+            },{
+                noAck: true
+            })
+        } else {
+            closeOtherActiveChannels(travelerId);
+            channelService.createChannel({travelerId, channelName, channelsPerAgent: [], agents: []});
+        }
+        
         return res.status(201).json("New Channel created successfully");
     } catch (error) {
         console.log(error);
