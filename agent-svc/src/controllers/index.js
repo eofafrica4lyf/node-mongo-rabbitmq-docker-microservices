@@ -56,4 +56,18 @@ router.put(
         }
 })
 
+router.get((
+    '/',
+    async (req, res) => {
+        try {
+            const {ids} = req.query;
+            const agents = await agentService.getAll(ids.split(',').filter(item => Number(item)));
+            return res.status(200).json(agents);
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json("An error occured!");
+        }
+    }
+))
+
 module.exports = router;
