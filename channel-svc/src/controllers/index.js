@@ -6,6 +6,7 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid')
 const { closeOtherActiveChannels } = require('../services/channel.service');
 const channelService = require('../services/channel.service');
+const { checkStringField } = require('../validations/validations');
 
 let channel;
 async function connect() {
@@ -16,8 +17,20 @@ async function connect() {
 }
 connect();
 
-router.post('/create', async (req, res) => {
+router.post(
+    '/create', 
+    [
+        checkStringField('travelerId', "Traveler Id is required"),
+        checkStringField('channelName', "Channel Name is required"),
+    ],
+    async (req, res) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+        const validationErrors = errors.array().filter((v) => v);
+        return res.status(400).send({ errors: validationErrors });
+        }
+
         const {travelerId, channelName} = req.body;
         const channelsPerAgent = await channelService.getChannelsPerAgent();
 
@@ -52,7 +65,12 @@ router.post('/create', async (req, res) => {
     }
 })
 
-router.post('/close', async (req, res) => {
+router.post(
+    '/close', 
+    [
+        checkStringField('travelerId', "Traveler Id is required"),
+    ],
+    async (req, res) => {
     try {
         const {travelerId} = req.body;
 
