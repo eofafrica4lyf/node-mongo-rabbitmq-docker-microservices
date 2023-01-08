@@ -3,15 +3,15 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const { firstName } = require('../entity/agent.entity');
 const agentService = require('../service/agent.service');
-const checkStringField = require('../validations/validations');
+const {checkStringField} = require('../validations/validations');
 
 router.post(
     '/create', 
     [
-        checkStringField(firstName, "First Name is required"),
-        checkStringField(lastName, "Last Name is required"),
-        checkStringField(startTime, "Start Time is required"),
-        checkStringField(endTime, "End Time is required"),
+        checkStringField('firstName', "First Name is required"),
+        checkStringField('lastName', "Last Name is required"),
+        checkStringField('startTime', "Start Time is required"),
+        checkStringField('endTime', "End Time is required"),
     ],
     async (req, res) => {
     try {
@@ -33,10 +33,10 @@ router.post(
 router.put(
     '/update', 
     [
-        checkStringField(firstName, "First Name is required"),
-        checkStringField(lastName, "Last Name is required"),
-        checkStringField(startTime, "Start Time is required"),
-        checkStringField(endTime, "End Time is required"),
+        checkStringField('firstName', "First Name is required"),
+        checkStringField('lastName', "Last Name is required"),
+        checkStringField('startTime', "Start Time is required"),
+        checkStringField('endTime', "End Time is required"),
     ],
     async (req, res) => {
         try {
