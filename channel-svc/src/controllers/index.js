@@ -16,7 +16,7 @@ async function connect() {
 }
 connect();
 
-router.post('/channel', async (req, res) => {
+router.post('/create', async (req, res) => {
     try {
         const {travelerId, channelName} = req.body;
         const channelsPerAgent = await channelService.getChannelsPerAgent();
@@ -52,7 +52,7 @@ router.post('/channel', async (req, res) => {
     }
 })
 
-router.post('/channel/close', async (req, res) => {
+router.post('/close', async (req, res) => {
     try {
         const {travelerId} = req.body;
 

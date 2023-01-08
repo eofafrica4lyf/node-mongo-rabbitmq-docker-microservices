@@ -12,7 +12,7 @@ app.use(express.json({
 }));
 
 app.get('/', (req, res) => res.send('Hello, world!'));
-app.post('/channel', channelRouter)
+app.use('/channel', channelRouter)
 
 app.listen(PORT, () => {
     console.log(`Channel app listening at http://localhost:${PORT}`)
