@@ -6,6 +6,7 @@ const express = require('express');
 const amqp = require('amqplib');
 
 const agentService = require('./service/agent.service');
+const agentRouter = require('./controllers');
 
 let channel;
 
@@ -38,6 +39,7 @@ const app = express();
 const PORT = process.env.PORT;
 
 app.get('/', (req, res) => res.send('Hello, world!'));
+app.use('/agent', agentRouter)
 
 app.listen(PORT, () => {
     console.log(`Agent app listening at http://localhost:${PORT}`)
