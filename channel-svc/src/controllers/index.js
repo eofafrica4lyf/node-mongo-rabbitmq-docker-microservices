@@ -52,4 +52,16 @@ router.post('/channel', async (req, res) => {
     }
 })
 
+router.post('/channel/close', async (req, res) => {
+    try {
+        const {travelerId} = req.body;
+
+        await channelService.closeOtherActiveChannels(travelerId);
+        return res.status(200).send('Channel closed successfully');
+    } catch (error) {
+        console.log(error);
+        return res.status(201).json("An error occured!");
+    }
+})
+
 module.exports = router;
