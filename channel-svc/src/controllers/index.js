@@ -1,21 +1,14 @@
 require('../config/db').connect();
 const express = require('express')
-const amqp = require('amqplib');
 
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid')
 const { closeOtherActiveChannels } = require('../services/channel.service');
 const channelService = require('../services/channel.service');
+const { validationResult } = require('express-validator');
 const { checkStringField } = require('../validations/validations');
+const connect = require('../rabbitmq/connect');
 
-let channel;
-async function connect() {
-    const amqpServer = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
-    const connection = await amqp.connect(amqpServer);
-    channel = await connection.createChannel();
-    await channel.assertQueue('CHANNEL');
-}
-connect();
 
 router.post(
     '/create', 
@@ -24,7 +17,8 @@ router.post(
         checkStringField('channelName', "Channel Name is required"),
     ],
     async (req, res) => {
-    try {
+        try {
+        let channel = await connect();
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
         const validationErrors = errors.array().filter((v) => v);
