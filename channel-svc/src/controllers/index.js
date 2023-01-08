@@ -48,7 +48,7 @@ router.post('/create', async (req, res) => {
         return res.status(201).json("New Channel created successfully");
     } catch (error) {
         console.log(error);
-        return res.status(201).json("An error occured!");
+        return res.status(400).json("An error occured!");
     }
 })
 
@@ -60,7 +60,7 @@ router.post('/close', async (req, res) => {
         return res.status(200).send('Channel closed successfully');
     } catch (error) {
         console.log(error);
-        return res.status(201).json("An error occured!");
+        return res.status(400).json("An error occured!");
     }
 })
 
