@@ -11,6 +11,10 @@ const agentService = {
 
     async create(data) {
         return await agentRespository.create(data);
+    },
+
+    async update(data) {
+        return await agentRespository.update(data);
     }
 }
 
