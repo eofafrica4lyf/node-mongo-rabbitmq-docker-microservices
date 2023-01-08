@@ -1,20 +1,24 @@
 const AgentRepository = require("../repository/agent.repository");
-const agentRespository = new AgentRepository();
+const agentRepository = new AgentRepository();
 
 const agentService = {
     async getAll (ids) {
         if (ids && ids.length > 0) {
-            return await agentRespository.getAgentsByIds(ids);
+            return await agentRepository.getAgentsByIds(ids);
         }
-        return await agentRespository.getAllAgents();
+        return await agentRepository.getAllAgents();
+    },
+
+    async getSingleAgent(id) {
+        return await agentRepository.getSingleAgentByID(id);
     },
 
     async create(data) {
-        return await agentRespository.create(data);
+        return await agentRepository.create(data);
     },
 
     async update(data) {
-        return await agentRespository.update(data);
+        return await agentRepository.update(data);
     }
 }
 

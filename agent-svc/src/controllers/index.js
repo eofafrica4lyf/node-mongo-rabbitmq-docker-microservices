@@ -70,4 +70,18 @@ router.get((
     }
 ))
 
+router.get((
+    '/:id',
+    async (req, res) => {
+        try {
+            const {id} = req.params;
+            const agent = await agentService.getSingleAgent(id);
+            return res.status(200).json(agent);
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json("An error occured!");
+        }
+    }
+))
+
 module.exports = router;
