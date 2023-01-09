@@ -48,3 +48,24 @@ Technologies:
 2. Mongo db
 3. RabbitMQ
 4. Docker/Docker-compose
+
+# How to start up the project
+
+## Requirements
+
+- *NIX terminal (Linux bash, zsh, WSL)
+- Docker
+
+## Run locally
+Step 1. Go to project dir:
+```shell
+cd /path/to/project
+```
+Step 2. Install dependencies (**OPTIONAL**):
+```shell
+make install
+```
+Step 3. Start services:
+```shell
+make up
+```
