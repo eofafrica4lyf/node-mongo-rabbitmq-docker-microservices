@@ -18,7 +18,7 @@ router.post(
     ],
     async (req, res) => {
         try {
-        let channel = await connect();
+        let MQChannel = await connect();
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
         const validationErrors = errors.array().filter((v) => v);
@@ -30,13 +30,13 @@ router.post(
 
         if(channelsPerAgent.length > 0) {
             const correlationId = uuidv4();
-            channel.sendToQueue("AGENT", Buffer.from(JSON.stringify({
+            MQChannel.sendToQueue("AGENT", Buffer.from(JSON.stringify({
                 correlationId,
                 topic: "GET_ALL_AGENTS",
                 replyTo: "CHANNEL",
                 data: channelsPerAgent.map(group => group._id)
             })));
-            channel.consume("CHANNEL", async (message)  => {
+            MQChannel.consume("CHANNEL", async (message)  => {
                 const parsedMessage = JSON.parse(message.content.toString());
                 if(parsedMessage.correlationId == correlationId) {
                     console.log("Correlates........")
