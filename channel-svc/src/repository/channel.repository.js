@@ -11,6 +11,10 @@ function ChannelRepository () {
         return await Channel.findOneAndUpdate({_id: channelId}, {isActive: false});
     }
 
+    this.getActiveChannels = async () => {
+        return await Channel.find({isActive: true});
+    }
+
     this.getChannelsPerAgent = async () => {
         return await Channel.aggregate([
             {
@@ -27,6 +31,10 @@ function ChannelRepository () {
 
     this.updateChannelsByTraveler = async (travelerId) => {
         return await Channel.updateMany({travelerId}, {isActive: false});
+    }
+
+    this.updateChannelAgent = async (channelId, agentId) => {
+        return await Channel.findOneAndUpdate({_id: channelId}, {agentId});
     }
 }
 

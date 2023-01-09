@@ -8,16 +8,17 @@ const amqp = require('amqplib');
 const agentService = require('./service/agent.service');
 const agentRouter = require('./controllers');
 
-let MQChannel;
 
 async function connect() {
+    let channel;
     const amqpServer = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
     const connection = await amqp.connect(amqpServer);
-    MQChannel = await connection.createChannel();
-    await MQChannel.assertQueue('AGENT'); 
+    channel = await connection.createChannel();
+    await channel.assertQueue('AGENT');
+    return channel;
 }
 
-connect().then(() => {
+connect().then((MQChannel) => {
     MQChannel.consume("AGENT", async (message) => {
         const parsedMessage = JSON.parse(message.content.toString());
         if (parsedMessage.topic === "GET_ALL_AGENTS") {
@@ -26,7 +27,16 @@ connect().then(() => {
                 "CHANNEL",
                 Buffer.from(JSON.stringify({
                     correlationId: parsedMessage.correlationId, 
-                    agents: agents
+                    agents
+                }))
+            )
+        } else if (parsedMessage.topic === "GET_SINGLE_AGENT") {
+            const agent = await agentService.getSingleAgent(parsedMessage.data.agentId);
+            MQChannel.sendToQueue(
+                "CHANNEL",
+                Buffer.from(JSON.stringify({
+                    correlationId: parsedMessage.correlationId, 
+                    agent
                 }))
             )
         }

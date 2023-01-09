@@ -1,5 +1,6 @@
 const ChannelRepository = require("../repository/channel.repository");
 const channelRepository = new ChannelRepository();
+const { v4: uuidv4 } = require('uuid')
 
 const channelService = {
     async createChannel ({travelerId, channelName, channelsPerAgent, agents}) {
@@ -14,6 +15,10 @@ const channelService = {
 
     async closeOtherActiveChannels(travelerId) {
         return await channelRepository.updateChannelsByTraveler(travelerId);
+    },
+
+    async getActiveChannels () {
+        return await channelRepository.getActiveChannels();
     },
 
     async getChannelsPerAgent () {
@@ -50,6 +55,35 @@ const channelService = {
             }
         })
         return hash;
+    },
+
+    async assignActiveAgentToChannel (channel, MQChannel) {
+        const correlationId = uuidv4();
+        MQChannel.sendToQueue("AGENT", Buffer.from(JSON.stringify({
+            correlationId,
+            topic: "GET_ALL_AGENTS",
+            replyTo: "CHANNEL",
+            data: null
+        })));
+        MQChannel.consume("CHANNEL", async (message)  => {
+            let selectedAgent;
+            const parsedMessage = JSON.parse(message.content.toString());
+            if(parsedMessage.correlationId == correlationId) {
+                const agents = parsedMessage.agents;
+                for(let i = 0; i < agents.length; i++) {
+                    const agent = agents[i];
+                    const currentHour = new Date().getHours();
+                    if (Number(agent.workingHours.start.split(":")[0]) <= currentHour &&
+                        Number(agent.workingHours.end.split(":")[0]) >= currentHour) {
+                        selectedAgent = agent;
+                        break;
+                    }
+                }
+                await channelRepository.updateChannelAgent(channel._id, selectedAgent ? selectedAgent._id : null);
+            }
+        },{
+            noAck: true
+        })
     }
 }
 
